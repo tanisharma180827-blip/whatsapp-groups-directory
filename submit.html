@@ -62,9 +62,22 @@
   }
   button:hover{background:var(--accent-dim);}
   button:disabled{opacity:.6;cursor:default;}
-  .msg{font-size:14px;text-align:center;margin-top:4px;}
+  .msg{font-size:14px;text-align:center;margin-top:4px;white-space:pre-wrap;word-break:break-word;}
   .msg.error{color:var(--error);}
   .msg.success{color:var(--accent);}
+  .msg.info{color:var(--muted);}
+  #debugBox{
+    margin-top:16px;
+    padding:12px;
+    background:#0b1412;
+    border:1px dashed var(--line);
+    border-radius:8px;
+    font-size:11px;
+    color:var(--muted);
+    white-space:pre-wrap;
+    word-break:break-word;
+    font-family:monospace;
+  }
 </style>
 </head>
 <body>
@@ -73,7 +86,7 @@
   <h1>Submit your WhatsApp group</h1>
   <p class="sub">Groups are reviewed before they go live.</p>
 
-  <form id="groupForm">
+  <form id="groupForm" onsubmit="return false;">
     <div>
       <label for="name">Group name</label>
       <input id="name" type="text" required placeholder="e.g. Delhi Job Seekers" />
@@ -99,24 +112,50 @@
       <label for="link">WhatsApp invite link</label>
       <input id="link" type="url" required placeholder="https://chat.whatsapp.com/..." />
     </div>
-    <button type="submit" id="submitBtn">Submit for review</button>
+    <button type="button" id="submitBtn">Submit for review</button>
     <div id="msg" class="msg"></div>
   </form>
+
+  <div id="debugBox">Debug log will appear here...</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="document.getElementById('debugBox').textContent = 'ERROR: Could not load the Supabase library from the CDN. Check your internet connection or try a different network.'"></script>
 <script>
-  const SUPABASE_URL = "https://rzpnlrektqtfykrtqjfw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
-  const TABLE_NAME = "groups";
+  function log(text) {
+    var box = document.getElementById("debugBox");
+    box.textContent += "\n" + text;
+  }
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const form = document.getElementById("groupForm");
+  window.onerror = function(message, source, lineno, colno, error) {
+    log("JS ERROR: " + message + " (line " + lineno + ")");
+    return false;
+  };
+
+  log("Page script started.");
+
+  const SUPABASE_URL = "https://rzpnlrektqtfykrtqjfw.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
+  const TABLE_NAME = "Groups";
+
+  if (typeof window.supabase === "undefined") {
+    log("ERROR: Supabase library did not load. window.supabase is undefined.");
+  } else {
+    log("Supabase library loaded OK.");
+  }
+
+  let supabase;
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    log("Supabase client created OK.");
+  } catch (err) {
+    log("ERROR creating client: " + err.message);
+  }
+
   const btn = document.getElementById("submitBtn");
   const msg = document.getElementById("msg");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  btn.addEventListener("click", async function () {
+    log("Submit button clicked.");
     msg.textContent = "";
     msg.className = "msg";
 
@@ -124,6 +163,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
     const description = document.getElementById("description").value.trim();
     const category = document.getElementById("category").value;
     const link = document.getElementById("link").value.trim();
+
+    log("Values: name=" + name + ", category=" + category + ", link=" + link);
+
+    if (!name || !category || !link) {
+      msg.textContent = "Please fill in all required fields.";
+      msg.classList.add("error");
+      return;
+    }
 
     if (!link.startsWith("https://chat.whatsapp.com/")) {
       msg.textContent = "Please paste a valid WhatsApp invite link (starts with chat.whatsapp.com).";
@@ -134,28 +181,39 @@ const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
     btn.disabled = true;
     btn.textContent = "Submitting...";
 
-    const { error } = await supabase.from(TABLE_NAME).insert([{
-      name,
-      description,
-      category,
-      whatsapp_link: link,
-      status: "pending"
-    }]);
+    try {
+      const { data, error } = await supabase.from(TABLE_NAME).insert([{
+        name: name,
+        description: description,
+        category: category,
+        whatsapp_link: link,
+        status: "pending"
+      }]);
 
-    btn.disabled = false;
-    btn.textContent = "Submit for review";
+      log("Insert response - error: " + JSON.stringify(error) + ", data: " + JSON.stringify(data));
 
-    if (error) {
-      msg.textContent = "Something went wrong: " + error.message;
+      btn.disabled = false;
+      btn.textContent = "Submit for review";
+
+      if (error) {
+        msg.textContent = "Something went wrong: " + error.message;
+        msg.classList.add("error");
+        return;
+      }
+
+      msg.textContent = "Submitted! Your group will appear once approved.";
+      msg.classList.add("success");
+      document.getElementById("groupForm").reset();
+    } catch (err) {
+      log("CAUGHT EXCEPTION: " + err.message);
+      btn.disabled = false;
+      btn.textContent = "Submit for review";
+      msg.textContent = "Unexpected error: " + err.message;
       msg.classList.add("error");
-      console.error(error);
-      return;
     }
-
-    msg.textContent = "Submitted! Your group will appear once approved.";
-    msg.classList.add("success");
-    form.reset();
   });
+
+  log("Event listener attached. Ready.");
 </script>
 </body>
 </html>
