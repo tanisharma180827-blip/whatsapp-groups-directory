@@ -1,1 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Your Group — WhatsApp Group Hub</title>
+<style>
+  :root{
+    --bg:#0b1412;
+    --panel:#101d19;
+    --line:#1f342c;
+    --text:#eaf4ee;
+    --muted:#8fa89c;
+    --accent:#25d366;
+    --accent-dim:#1a9c4a;
+    --error:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:48px 20px;
+  }
+  .wrap{max-width:480px;width:100%;}
+  a.back{color:var(--muted);font-size:13px;text-decoration:none;}
+  h1{font-size:26px;margin:16px 0 4px;}
+  p.sub{color:var(--muted);margin:0 0 28px;font-size:14px;}
+  form{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+  input, textarea, select{
+    width:100%;
+    padding:11px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#0b1412;
+    color:var(--text);
+    font-size:14px;
+    font-family:inherit;
+  }
+  textarea{resize:vertical;min-height:70px;}
+  button{
+    background:var(--accent);
+    color:#04150c;
+    font-weight:700;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{background:var(--accent-dim);}
+  button:disabled{opacity:.6;cursor:default;}
+  .msg{font-size:14px;text-align:center;margin-top:4px;}
+  .msg.error{color:var(--error);}
+  .msg.success{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to groups</a>
+  <h1>Submit your WhatsApp group</h1>
+  <p class="sub">Groups are reviewed before they go live.</p>
 
+  <form id="groupForm">
+    <div>
+      <label for="name">Group name</label>
+      <input id="name" type="text" required placeholder="e.g. Delhi Job Seekers" />
+    </div>
+    <div>
+      <label for="description">Short description</label>
+      <textarea id="description" placeholder="What's this group about?"></textarea>
+    </div>
+    <div>
+      <label for="category">Category</label>
+      <select id="category" required>
+        <option value="">Select a category</option>
+        <option>Jobs</option>
+        <option>Education</option>
+        <option>Technology</option>
+        <option>Business</option>
+        <option>Entertainment</option>
+        <option>Local / City</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div>
+      <label for="link">WhatsApp invite link</label>
+      <input id="link" type="url" required placeholder="https://chat.whatsapp.com/..." />
+    </div>
+    <button type="submit" id="submitBtn">Submit for review</button>
+    <div id="msg" class="msg"></div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const TABLE_NAME = "groups";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const form = document.getElementById("groupForm");
+  const btn = document.getElementById("submitBtn");
+  const msg = document.getElementById("msg");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.className = "msg";
+
+    const name = document.getElementById("name").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const category = document.getElementById("category").value;
+    const link = document.getElementById("link").value.trim();
+
+    if (!link.startsWith("https://chat.whatsapp.com/")) {
+      msg.textContent = "Please paste a valid WhatsApp invite link (starts with chat.whatsapp.com).";
+      msg.classList.add("error");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+
+    const { error } = await supabase.from(TABLE_NAME).insert([{
+      name,
+      description,
+      category,
+      invite_link: link,
+      status: "pending"
+    }]);
+
+    btn.disabled = false;
+    btn.textContent = "Submit for review";
+
+    if (error) {
+      msg.textContent = "Something went wrong: " + error.message;
+      msg.classList.add("error");
+      console.error(error);
+      return;
+    }
+
+    msg.textContent = "Submitted! Your group will appear once approved.";
+    msg.classList.add("success");
+    form.reset();
+  });
+</script>
+</body>
+</html>
