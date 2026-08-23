@@ -60,6 +60,7 @@
   }
   .btn-primary{background:var(--green);color:#fff;}
   .btn-primary:hover{background:var(--green-dark);}
+  .btn-outline{background:#fff;border-color:var(--line);color:var(--ink);}
 
   .hero{
     background:var(--bg-soft);
@@ -179,8 +180,8 @@
     <a href="#categories">Categories</a>
     <a href="#">About Us</a>
   </nav>
-  <div class="header-actions">
-    <a href="#register" class="btn btn-primary">+ Register Group</a>
+  <div class="header-actions" id="headerActions">
+    <a href="auth.html" class="btn btn-outline" id="loginLink">Login / Register</a>
   </div>
 </header>
 
@@ -269,7 +270,7 @@
         <input id="gLink" type="url" placeholder="https://chat.whatsapp.com/..." />
       </div>
 
-      <button class="register-btn" id="registerBtn" disabled>Loading...</button>
+      <button class="register-btn" id="registerBtn" disabled>Log In to Register</button>
       <div class="form-msg" id="formMsg"></div>
     </div>
 
@@ -314,9 +315,35 @@
       document.getElementById("grid").innerHTML = '<div class="empty-state">Setup error: ' + err.message + '</div>';
       return;
     }
-    document.getElementById("registerBtn").disabled = false;
-    document.getElementById("registerBtn").textContent = "Register Now";
+    checkLoginState();
     loadGroups();
+  }
+
+  var currentUser = null;
+
+  async function checkLoginState() {
+    var sessionResult = await supabaseClient.auth.getSession();
+    var session = sessionResult.data.session;
+    var headerActions = document.getElementById("headerActions");
+    var registerBtn = document.getElementById("registerBtn");
+
+    if (session) {
+      currentUser = session.user;
+      headerActions.innerHTML =
+        '<a href="dashboard.html" class="btn btn-outline">My Dashboard</a>' +
+        '<button class="btn btn-primary" id="logoutBtn">Log Out</button>';
+      document.getElementById("logoutBtn").addEventListener("click", async function () {
+        await supabaseClient.auth.signOut();
+        window.location.reload();
+      });
+      registerBtn.disabled = false;
+      registerBtn.textContent = "Register Now";
+    } else {
+      currentUser = null;
+      headerActions.innerHTML = '<a href="auth.html" class="btn btn-outline">Login / Register</a>';
+      registerBtn.disabled = false;
+      registerBtn.textContent = "Log In to Register";
+    }
   }
 
   function cdnFailed() {
@@ -447,6 +474,11 @@
     msg.textContent = "";
     msg.className = "form-msg";
 
+    if (!currentUser) {
+      window.location.href = "auth.html";
+      return;
+    }
+
     var name = document.getElementById("gName").value.trim();
     var description = document.getElementById("gDesc").value.trim();
     var category = document.getElementById("gCategory").value;
@@ -474,7 +506,8 @@
         category: category,
         whatsapp_link: link,
         type: selectedType,
-        status: "pending"
+        status:"pending",
+        user_id: currentUser.id
       }]);
 
       btn.disabled = false;
