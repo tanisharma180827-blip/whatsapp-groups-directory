@@ -65,19 +65,6 @@
   .msg{font-size:14px;text-align:center;margin-top:4px;white-space:pre-wrap;word-break:break-word;}
   .msg.error{color:var(--error);}
   .msg.success{color:var(--accent);}
-  .msg.info{color:var(--muted);}
-  #debugBox{
-    margin-top:16px;
-    padding:12px;
-    background:#0b1412;
-    border:1px dashed var(--line);
-    border-radius:8px;
-    font-size:11px;
-    color:var(--muted);
-    white-space:pre-wrap;
-    word-break:break-word;
-    font-family:monospace;
-  }
 </style>
 </head>
 <body>
@@ -112,110 +99,95 @@
       <label for="link">WhatsApp invite link</label>
       <input id="link" type="url" required placeholder="https://chat.whatsapp.com/..." />
     </div>
-    <button type="button" id="submitBtn">Submit for review</button>
+    <button type="button" id="submitBtn" disabled>Loading...</button>
     <div id="msg" class="msg"></div>
   </form>
-
-  <div id="debugBox">Debug log will appear here...</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="document.getElementById('debugBox').textContent = 'ERROR: Could not load the Supabase library from the CDN. Check your internet connection or try a different network.'"></script>
 <script>
-  function log(text) {
-    var box = document.getElementById("debugBox");
-    box.textContent += "\n" + text;
-  }
-
-  window.onerror = function(message, source, lineno, colno, error) {
-    log("JS ERROR: " + message + " (line " + lineno + ")");
-    return false;
-  };
-
-  log("Page script started.");
-
   const SUPABASE_URL = "https://rzpnlrektqtfykrtqjfw.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
   const TABLE_NAME = "Groups";
 
-  if (typeof window.supabase === "undefined") {
-    log("ERROR: Supabase library did not load. window.supabase is undefined.");
-  } else {
-    log("Supabase library loaded OK.");
-  }
+  var supabaseClient;
 
-  let supabase;
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    log("Supabase client created OK.");
-  } catch (err) {
-    log("ERROR creating client: " + err.message);
-  }
-
-  const btn = document.getElementById("submitBtn");
-  const msg = document.getElementById("msg");
-
-  btn.addEventListener("click", async function () {
-    log("Submit button clicked.");
-    msg.textContent = "";
-    msg.className = "msg";
-
-    const name = document.getElementById("name").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const category = document.getElementById("category").value;
-    const link = document.getElementById("link").value.trim();
-
-    log("Values: name=" + name + ", category=" + category + ", link=" + link);
-
-    if (!name || !category || !link) {
-      msg.textContent = "Please fill in all required fields.";
-      msg.classList.add("error");
-      return;
-    }
-
-    if (!link.startsWith("https://chat.whatsapp.com/")) {
-      msg.textContent = "Please paste a valid WhatsApp invite link (starts with chat.whatsapp.com).";
-      msg.classList.add("error");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = "Submitting...";
-
+  function startApp() {
     try {
-      const { data, error } = await supabase.from(TABLE_NAME).insert([{
-        name: name,
-        description: description,
-        category: category,
-        whatsapp_link: link,
-        status: "pending"
-      }]);
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (err) {
+      document.getElementById("msg").textContent = "Setup error: " + err.message;
+      document.getElementById("msg").className = "msg error";
+      return;
+    }
 
-      log("Insert response - error: " + JSON.stringify(error) + ", data: " + JSON.stringify(data));
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = false;
+    btn.textContent = "Submit for review";
 
-      btn.disabled = false;
-      btn.textContent = "Submit for review";
+    const msg = document.getElementById("msg");
 
-      if (error) {
-        msg.textContent = "Something went wrong: " + error.message;
+    btn.addEventListener("click", async function () {
+      msg.textContent = "";
+      msg.className = "msg";
+
+      const name = document.getElementById("name").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const category = document.getElementById("category").value;
+      const link = document.getElementById("link").value.trim();
+
+      if (!name || !category || !link) {
+        msg.textContent = "Please fill in all required fields.";
         msg.classList.add("error");
         return;
       }
 
-      msg.textContent = "Submitted! Your group will appear once approved.";
-      msg.classList.add("success");
-      document.getElementById("groupForm").reset();
-    } catch (err) {
-      log("CAUGHT EXCEPTION: " + err.message);
-      btn.disabled = false;
-      btn.textContent = "Submit for review";
-      msg.textContent = "Unexpected error: " + err.message;
-      msg.classList.add("error");
-    }
-  });
+      if (!link.startsWith("https://chat.whatsapp.com/")) {
+        msg.textContent = "Please paste a valid WhatsApp invite link (starts with chat.whatsapp.com).";
+        msg.classList.add("error");
+        return;
+      }
 
-  log("Event listener attached. Ready.");
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+
+      try {
+        const { data, error } = await supabaseClient.from(TABLE_NAME).insert([{
+          name: name,
+          description: description,
+          category: category,
+          whatsapp_link: link,
+          status: "pending"
+        }]);
+
+        btn.disabled = false;
+        btn.textContent = "Submit for review";
+
+        if (error) {
+          msg.textContent = "Something went wrong: " + error.message;
+          msg.classList.add("error");
+          return;
+        }
+
+        msg.textContent = "Submitted! Your group will appear once approved.";
+        msg.classList.add("success");
+        document.getElementById("groupForm").reset();
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Submit for review";
+        msg.textContent = "Unexpected error: " + err.message;
+        msg.classList.add("error");
+      }
+    });
+  }
+
+  function cdnFailed() {
+    var msg = document.getElementById("msg");
+    msg.textContent = "Could not load required library. Check your internet connection and reload.";
+    msg.classList.add("error");
+  }
 </script>
-<body>
-<script>document.body.style.background = "red";</script>
-<div class="wrap">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="startApp()" onerror="cdnFailed()"></script>
+
+</body>
 </html>
