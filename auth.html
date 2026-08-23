@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In / Sign Up — WhatsGroups</title>
+<style>
+  :root{
+    --green:#25d366;
+    --green-dark:#1da851;
+    --ink:#111827;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg-soft:#f6fbf7;
+    --error:#dc2626;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--bg-soft);
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:48px 20px;
+  }
+  .wrap{max-width:420px;width:100%;}
+  a.back{color:var(--muted);font-size:13px;text-decoration:none;}
+  .brand{display:flex;align-items:center;gap:10px;margin:16px 0 24px;}
+  .brand-icon{width:42px;height:42px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;}
+  .brand h1{font-size:19px;margin:0;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;}
+  .toggle-row{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:22px;}
+  .toggle-btn{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);}
+  .toggle-btn.active{background:var(--green);color:#fff;}
+  .field{margin-bottom:16px;}
+  .field label{font-size:13px;font-weight:600;display:block;margin-bottom:6px;}
+  .field input{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);font-size:14px;}
+  .submit-btn{width:100%;background:var(--green);color:#fff;border:none;padding:13px;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;}
+  .submit-btn:disabled{opacity:.6;}
+  .msg{font-size:13px;text-align:center;margin-top:14px;}
+  .msg.error{color:var(--error);}
+  .msg.success{color:var(--green-dark);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to home</a>
+  <div class="brand">
+    <div class="brand-icon">&#128172;</div>
+    <h1>WhatsGroups</h1>
+  </div>
+
+  <div class="card">
+    <div class="toggle-row">
+      <div class="toggle-btn active" id="loginTab" onclick="switchMode('login')">Log In</div>
+      <div class="toggle-btn" id="signupTab" onclick="switchMode('signup')">Sign Up</div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.com" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="At least 6 characters" />
+    </div>
+
+    <button class="submit-btn" id="authBtn" disabled>Loading...</button>
+    <div class="msg" id="authMsg"></div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://rzpnlrektqtfykrtqjfw.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
+
+  var supabaseClient;
+  var mode = "login";
+
+  function startApp() {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    document.getElementById("authBtn").disabled = false;
+    document.getElementById("authBtn").textContent = "Log In";
+
+    supabaseClient.auth.getSession().then(function(result){
+      if (result.data.session) {
+        window.location.href = "dashboard.html";
+      }
+    });
+  }
+
+  function cdnFailed() {
+    document.getElementById("authMsg").textContent = "Could not load required library. Check your connection and reload.";
+    document.getElementById("authMsg").className = "msg error";
+  }
+
+  function switchMode(newMode) {
+    mode = newMode;
+    document.getElementById("loginTab").classList.toggle("active", mode === "login");
+    document.getElementById("signupTab").classList.toggle("active", mode === "signup");
+    document.getElementById("authBtn").textContent = mode === "login" ? "Log In" : "Sign Up";
+    document.getElementById("authMsg").textContent = "";
+  }
+
+  document.getElementById("authBtn").addEventListener("click", async function () {
+    var msg = document.getElementById("authMsg");
+    msg.textContent = "";
+    msg.className = "msg";
+
+    var email = document.getElementById("email").value.trim();
+    var password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      msg.textContent = "Please enter both email and password.";
+      msg.classList.add("error");
+      return;
+    }
+    if (password.length < 6) {
+      msg.textContent = "Password must be at least 6 characters.";
+      msg.classList.add("error");
+      return;
+    }
+
+    var btn = document.getElementById("authBtn");
+    btn.disabled = true;
+    btn.textContent = "Please wait...";
+
+    try {
+      var result;
+      if (mode === "login") {
+        result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+      } else {
+        result = await supabaseClient.auth.signUp({ email: email, password: password });
+      }
+
+      btn.disabled = false;
+      btn.textContent = mode === "login" ? "Log In" : "Sign Up";
+
+      if (result.error) {
+        msg.textContent = result.error.message;
+        msg.classList.add("error");
+        return;
+      }
+
+      if (mode === "signup") {
+        msg.textContent = "Account created! Redirecting...";
+      } else {
+        msg.textContent = "Logged in! Redirecting...";
+      }
+      msg.classList.add("success");
+      setTimeout(function(){ window.location.href = "dashboard.html"; }, 800);
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = mode === "login" ? "Log In" : "Sign Up";
+      msg.textContent = "Unexpected error: " + err.message;
+      msg.classList.add("error");
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="startApp()" onerror="cdnFailed()"></script>
+</body>
+</html>
