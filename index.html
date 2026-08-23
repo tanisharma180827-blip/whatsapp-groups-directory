@@ -3,220 +3,504 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Group Hub</title>
+<title>WhatsGroups — Discover WhatsApp Groups, Communities & Channels</title>
 <style>
   :root{
-    --bg:#0b1412;
-    --panel:#101d19;
-    --line:#1f342c;
-    --text:#eaf4ee;
-    --muted:#8fa89c;
-    --accent:#25d366;
-    --accent-dim:#1a9c4a;
+    --green:#25d366;
+    --green-dark:#1da851;
+    --ink:#111827;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg-soft:#f6fbf7;
+    --card-bg:#ffffff;
+    --radius:12px;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--bg);
-    color:var(--text);
     font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
-    line-height:1.5;
+    color:var(--ink);
+    background:#fff;
   }
+  a{text-decoration:none;color:inherit;}
+  img{max-width:100%;display:block;}
+
   header{
-    padding:48px 20px 32px;
-    text-align:center;
-    border-bottom:1px solid var(--line);
-  }
-  header h1{
-    font-size:clamp(28px,5vw,42px);
-    margin:0 0 8px;
-    letter-spacing:-0.02em;
-  }
-  header p{
-    color:var(--muted);
-    margin:0 0 20px;
-    font-size:15px;
-  }
-  .cta{
-    display:inline-block;
-    background:var(--accent);
-    color:#04150c;
-    font-weight:700;
-    padding:12px 24px;
-    border-radius:999px;
-    text-decoration:none;
-    font-size:14px;
-  }
-  .cta:hover{background:var(--accent-dim);}
-  .search-bar{
-    max-width:480px;
-    margin:24px auto 0;
-    padding:0 20px;
-  }
-  #search{
-    width:100%;
-    padding:12px 16px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:var(--panel);
-    color:var(--text);
-    font-size:14px;
-  }
-  main{
-    max-width:1000px;
-    margin:0 auto;
-    padding:32px 20px 80px;
-  }
-  .category-block{margin-bottom:44px;}
-  .category-title{
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:.12em;
-    color:var(--accent);
-    margin:0 0 16px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--line);
-  }
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-    gap:14px;
-  }
-  .card{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:16px;
     display:flex;
-    flex-direction:column;
-    gap:8px;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 32px;
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+    gap:12px;
   }
-  .card h3{
-    margin:0;
-    font-size:16px;
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-icon{
+    width:42px;height:42px;border-radius:10px;
+    background:var(--green);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:20px;
   }
-  .card p{
-    margin:0;
-    color:var(--muted);
-    font-size:13px;
-    flex-grow:1;
-  }
-  .join{
-    align-self:flex-start;
-    background:var(--accent);
-    color:#04150c;
-    font-weight:700;
-    padding:8px 16px;
+  .brand-text h1{font-size:19px;margin:0;line-height:1.1;}
+  .brand-text p{font-size:11px;color:var(--muted);margin:0;}
+  nav{display:flex;gap:24px;flex-wrap:wrap;}
+  nav a{font-size:14px;font-weight:500;color:var(--ink);padding-bottom:4px;}
+  nav a.active{color:var(--green-dark);border-bottom:2px solid var(--green);}
+  .header-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{
+    padding:10px 18px;
     border-radius:8px;
-    text-decoration:none;
-    font-size:13px;
-    margin-top:4px;
+    font-size:14px;
+    font-weight:600;
+    border:1px solid transparent;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
   }
-  .join:hover{background:var(--accent-dim);}
+  .btn-primary{background:var(--green);color:#fff;}
+  .btn-primary:hover{background:var(--green-dark);}
+
+  .hero{
+    background:var(--bg-soft);
+    padding:40px 32px;
+    display:grid;
+    grid-template-columns:1.3fr 0.8fr;
+    gap:32px;
+    align-items:center;
+  }
+  .hero h2{font-size:38px;line-height:1.15;margin:0 0 16px;}
+  .hero h2 span{color:var(--green-dark);}
+  .hero p{color:var(--muted);font-size:15px;max-width:520px;margin-bottom:24px;}
+  .search-row{display:flex;gap:10px;max-width:560px;}
+  .search-row input{
+    flex:1;padding:14px 16px;border-radius:8px;border:1px solid var(--line);font-size:14px;
+  }
+  .search-row button{
+    background:var(--green);color:#fff;border:none;padding:0 26px;border-radius:8px;font-weight:600;cursor:pointer;
+  }
+  .popular{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted);}
+  .pill{
+    background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:13px;color:var(--ink);cursor:pointer;
+  }
+  .hero-visual{display:flex;align-items:center;justify-content:center;}
+  .phone-mock{
+    width:180px;height:340px;background:#fff;border:8px solid var(--ink);border-radius:32px;
+    display:flex;flex-direction:column;align-items:center;padding:24px 14px;gap:10px;position:relative;
+  }
+  .phone-mock .avatar{width:56px;height:56px;border-radius:50%;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .phone-mock .line{width:100%;height:8px;background:var(--bg-soft);border-radius:4px;}
+  .phone-mock .line.short{width:60%;}
+  .phone-mock .fab{
+    position:absolute;bottom:-14px;right:-14px;width:40px;height:40px;border-radius:50%;background:var(--green);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;
+  }
+
+  main{
+    display:grid;
+    grid-template-columns:1fr 360px;
+    gap:28px;
+    padding:32px;
+    align-items:start;
+  }
+  .browse-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
+  .browse-header h3{font-size:22px;margin:0;}
+  .tabs{display:flex;gap:8px;margin:14px 0 20px;flex-wrap:wrap;}
+  .tab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;color:var(--muted);}
+  .tab.active{background:var(--bg-soft);color:var(--green-dark);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;background:var(--card-bg);}
+  .card-top{display:flex;align-items:center;gap:12px;}
+  .card-icon{width:44px;height:44px;border-radius:10px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .card-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .card-title-row h4{margin:0;font-size:16px;}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;}
+  .badge.Group{background:#e8f9ee;color:var(--green-dark);}
+  .badge.Community{background:#eaf1ff;color:#2f5fd6;}
+  .badge.Channel{background:#f5e9ff;color:#8b3fd1;}
+  .card-cat{font-size:12px;color:var(--muted);}
+  .card-desc{font-size:13px;color:var(--muted);flex-grow:1;}
+  .card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
   .members{font-size:12px;color:var(--muted);}
-  .empty, .loading{
-    text-align:center;
-    color:var(--muted);
-    padding:60px 20px;
+  .join-btn{border:1px solid var(--green);color:var(--green-dark);background:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;}
+  .join-btn:hover{background:var(--green);color:#fff;}
+  .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+
+  .sidebar-card{border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:20px;}
+  .sidebar-card h3{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+  .sidebar-card h3 .icon-badge{width:34px;height:34px;border-radius:8px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .sidebar-card p.sub{font-size:12px;color:var(--muted);margin:0 0 16px 44px;}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;font-weight:600;display:block;margin-bottom:6px;}
+  .field input, .field textarea, .field select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-size:13px;font-family:inherit;}
+  .field textarea{min-height:70px;resize:vertical;}
+  .type-row{display:flex;gap:8px;margin-bottom:14px;}
+  .type-opt{flex:1;text-align:center;padding:12px 6px;border-radius:8px;border:1px solid var(--line);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);}
+  .type-opt.selected{border-color:var(--green);color:var(--green-dark);background:var(--bg-soft);}
+  .register-btn{width:100%;background:var(--green);color:#fff;border:none;padding:13px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;}
+  .register-btn:disabled{opacity:.6;}
+  .form-msg{font-size:12px;margin-top:10px;text-align:center;}
+  .form-msg.error{color:#dc2626;}
+  .form-msg.success{color:var(--green-dark);}
+
+  .cat-list{display:flex;flex-direction:column;gap:2px;}
+  .cat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px;border-bottom:1px solid var(--bg-soft);}
+  .cat-row:last-child{border-bottom:none;}
+  .cat-row .count{color:var(--muted);font-size:12px;}
+
+  .trust-card{background:var(--bg-soft);border:none;display:flex;gap:12px;align-items:flex-start;}
+  .trust-card .icon-badge{background:#fff;}
+  .trust-card p.sub{margin-left:0;}
+
+  @media (max-width: 900px){
+    main{grid-template-columns:1fr;}
+    .hero{grid-template-columns:1fr;}
+    .hero-visual{order:-1;}
+    nav{order:3;width:100%;justify-content:center;}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>WhatsApp Group Hub</h1>
-  <p>Find and join WhatsApp groups by category.</p>
-  <a class="cta" href="submit.html">+ Submit your group</a>
-  <div class="search-bar">
-    <input id="search" type="text" placeholder="Search groups..." />
+  <div class="brand">
+    <div class="brand-icon">&#128172;</div>
+    <div class="brand-text">
+      <h1>WhatsGroups</h1>
+      <p>Explore. Connect. Grow.</p>
+    </div>
+  </div>
+  <nav>
+    <a href="#" class="active">Home</a>
+    <a href="#browse">Groups</a>
+    <a href="#browse">Communities</a>
+    <a href="#browse">Channels</a>
+    <a href="#categories">Categories</a>
+    <a href="#">About Us</a>
+  </nav>
+  <div class="header-actions">
+    <a href="#register" class="btn btn-primary">+ Register Group</a>
   </div>
 </header>
 
-<main id="app">
-  <div class="loading">Loading groups…</div>
+<section class="hero">
+  <div>
+    <h2>Discover Amazing<br><span>WhatsApp Groups</span></h2>
+    <p>Explore active WhatsApp Groups, Communities and Channels on different topics.</p>
+    <div class="search-row">
+      <input id="searchInput" type="text" placeholder="Search groups, categories..." />
+      <button onclick="applySearch()">Search</button>
+    </div>
+    <div class="popular">
+      <span>Popular Searches:</span>
+      <span class="pill" onclick="quickSearch('Study')">Study</span>
+      <span class="pill" onclick="quickSearch('Jobs')">Jobs</span>
+      <span class="pill" onclick="quickSearch('Business')">Business</span>
+      <span class="pill" onclick="quickSearch('Crypto')">Crypto</span>
+      <span class="pill" onclick="quickSearch('Fitness')">Fitness</span>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="phone-mock">
+      <div class="avatar">&#128101;</div>
+      <div class="line"></div>
+      <div class="line short"></div>
+      <div class="line"></div>
+      <div class="line short"></div>
+      <div class="fab">&#128172;</div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div id="browse">
+    <div class="browse-header">
+      <h3>Browse Registered Groups</h3>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-filter="All" onclick="setTab(this,'All')">All</div>
+      <div class="tab" data-filter="Group" onclick="setTab(this,'Group')">Groups</div>
+      <div class="tab" data-filter="Community" onclick="setTab(this,'Community')">Communities</div>
+      <div class="tab" data-filter="Channel" onclick="setTab(this,'Channel')">Channels</div>
+    </div>
+    <div id="grid" class="grid">
+      <div class="empty-state">Loading groups...</div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="sidebar-card" id="register">
+      <h3><span class="icon-badge">&#128101;</span> Register Your WhatsApp Group</h3>
+      <p class="sub">Add your group and reach more people.</p>
+
+      <div class="field">
+        <label for="gName">Group / Community / Channel Name</label>
+        <input id="gName" type="text" placeholder="e.g. Python Developers Group" />
+      </div>
+      <div class="field">
+        <label for="gDesc">Description</label>
+        <textarea id="gDesc" placeholder="Write a short description about your group..."></textarea>
+      </div>
+
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Type</label>
+      <div class="type-row" id="typeRow">
+        <div class="type-opt selected" data-type="Group" onclick="selectType(this,'Group')">Group</div>
+        <div class="type-opt" data-type="Community" onclick="selectType(this,'Community')">Community</div>
+        <div class="type-opt" data-type="Channel" onclick="selectType(this,'Channel')">Channel</div>
+      </div>
+
+      <div class="field">
+        <label for="gCategory">Category</label>
+        <select id="gCategory">
+          <option value="">Select Category</option>
+          <option>Education</option>
+          <option>Technology</option>
+          <option>Jobs</option>
+          <option>Health & Fitness</option>
+          <option>Entertainment</option>
+          <option>Business</option>
+          <option>Crypto</option>
+          <option>Others</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="gLink">WhatsApp Invite Link</label>
+        <input id="gLink" type="url" placeholder="https://chat.whatsapp.com/..." />
+      </div>
+
+      <button class="register-btn" id="registerBtn" disabled>Loading...</button>
+      <div class="form-msg" id="formMsg"></div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3><span class="icon-badge">&#128193;</span> Popular Categories</h3>
+      <div class="cat-list" id="categoryList" style="margin-top:10px;">
+        <div style="color:#6b7280;font-size:13px;">Loading...</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card trust-card">
+      <span class="icon-badge">&#128737;</span>
+      <div>
+        <h3 style="margin:0;font-size:14px;">100% Safe &amp; Trusted</h3>
+        <p class="sub" style="margin-top:6px;">We only list active and genuine WhatsApp groups. Your safety is our priority.</p>
+      </div>
+    </div>
+  </aside>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://rzpnlrektqtfykrtqjfw.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_qr965NHGS83JhK3QI0V2Eg_vnuKPqO-";
-  const TABLE_NAME = "groups";
+  const TABLE_NAME = "Groups";
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const app = document.getElementById("app");
-  const searchInput = document.getElementById("search");
-  let allGroups = [];
+  var supabaseClient;
+  var allGroups = [];
+  var currentTab = "All";
+  var currentSearch = "";
+  var selectedType = "Group";
+
+  var categoryIcons = {
+    "Education":"\uD83D\uDCD8","Technology":"\uD83D\uDCBB","Jobs":"\uD83D\uDCBC","Health & Fitness":"\uD83D\uDCAA",
+    "Entertainment":"\uD83C\uDFAC","Business":"\uD83D\uDCC8","Crypto":"\u20BF","Others":"\uD83C\uDF10",
+    "Local / City":"\uD83D\uDCCD","Other":"\uD83C\uDF10"
+  };
+
+  function startApp() {
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (err) {
+      document.getElementById("grid").innerHTML = '<div class="empty-state">Setup error: ' + err.message + '</div>';
+      return;
+    }
+    document.getElementById("registerBtn").disabled = false;
+    document.getElementById("registerBtn").textContent = "Register Now";
+    loadGroups();
+  }
+
+  function cdnFailed() {
+    document.getElementById("grid").innerHTML = '<div class="empty-state">Could not load required library. Check your connection and reload.</div>';
+  }
 
   async function loadGroups() {
-    const { data, error } = await supabase
+    const result = await supabaseClient
       .from(TABLE_NAME)
       .select("*")
       .eq("status", "approved")
-      .order("category", { ascending: true });
+      .order("created_at", { ascending: false });
 
-    if (error) {
-      app.innerHTML = `<div class="empty">Couldn't load groups. Check your Supabase config.<br><small>${error.message}</small></div>`;
-      console.error(error);
+    if (result.error) {
+      document.getElementById("grid").innerHTML = '<div class="empty-state">Could not load groups: ' + result.error.message + '</div>';
       return;
     }
 
-    allGroups = data || [];
-    render(allGroups);
+    allGroups = result.data || [];
+    renderCategories(allGroups);
+    renderGrid();
   }
 
-  function render(groups) {
-    if (!groups.length) {
-      app.innerHTML = `<div class="empty">No groups yet. Be the first to <a href="submit.html" style="color:var(--accent)">submit one</a>.</div>`;
+  function renderCategories(groups) {
+    var counts = {};
+    groups.forEach(function(g){
+      var cat = g.category || "Others";
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    var list = document.getElementById("categoryList");
+    var cats = Object.keys(counts);
+    if (!cats.length) {
+      list.innerHTML = '<div style="color:#6b7280;font-size:13px;">No categories yet.</div>';
+      return;
+    }
+    list.innerHTML = cats.map(function(cat){
+      return '<div class="cat-row"><span>' + (categoryIcons[cat] || "\uD83D\uDCC1") + ' ' + escapeHtml(cat) + '</span><span class="count">' + counts[cat] + '</span></div>';
+    }).join("");
+  }
+
+  function renderGrid() {
+    var grid = document.getElementById("grid");
+    var filtered = allGroups;
+
+    if (currentTab !== "All") {
+      filtered = filtered.filter(function(g){ return (g.type || "Group") === currentTab; });
+    }
+    if (currentSearch) {
+      var q = currentSearch.toLowerCase();
+      filtered = filtered.filter(function(g){
+        return (g.name && g.name.toLowerCase().indexOf(q) !== -1) ||
+               (g.category && g.category.toLowerCase().indexOf(q) !== -1) ||
+               (g.description && g.description.toLowerCase().indexOf(q) !== -1);
+      });
+    }
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty-state">No groups found. Be the first to <a href="#register" style="color:#1da851;">register one</a>.</div>';
       return;
     }
 
-    const byCategory = {};
-    for (const g of groups) {
-      const cat = g.category || "Other";
-      if (!byCategory[cat]) byCategory[cat] = [];
-      byCategory[cat].push(g);
-    }
-
-    app.innerHTML = Object.keys(byCategory).sort().map(cat => `
-      <div class="category-block">
-        <h2 class="category-title">${escapeHtml(cat)}</h2>
-        <div class="grid">
-          ${byCategory[cat].map(cardHtml).join("")}
-        </div>
-      </div>
-    `).join("");
+    grid.innerHTML = filtered.map(cardHtml).join("");
   }
 
   function cardHtml(g) {
-    return `
-      <div class="card">
-        <h3>${escapeHtml(g.name)}</h3>
-        ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ""}
-        ${g.member_count ? `<span class="members">${g.member_count} members</span>` : ""}
-        <a class="join" href="${escapeAttr(g.whatsapp_link)}" target="_blank" rel="noopener">Join Group</a>
-      </div>
-    `;
+    var type = g.type || "Group";
+    var cat = g.category || "Others";
+    var icon = categoryIcons[cat] || "\uD83D\uDCC1";
+    var members = g.member_count ? formatMembers(g.member_count) + " members" : "";
+    var actionLabel = type === "Channel" ? "Join Channel" : "Join Group";
+    return '<div class="card">' +
+      '<div class="card-top">' +
+        '<div class="card-icon">' + icon + '</div>' +
+        '<div>' +
+          '<div class="card-title-row"><h4>' + escapeHtml(g.name) + '</h4><span class="badge ' + type + '">' + type + '</span></div>' +
+          '<div class="card-cat">' + escapeHtml(cat) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-desc">' + escapeHtml(g.description || "") + '</div>' +
+      '<div class="card-bottom">' +
+        '<span class="members">' + members + '</span>' +
+        '<a class="join-btn" href="' + escapeAttr(g.whatsapp_link) + '" target="_blank" rel="noopener">' + actionLabel + '</a>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function formatMembers(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    return String(n);
   }
 
   function escapeHtml(str) {
     if (!str) return "";
-    return str.replace(/[&<>"']/g, m => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[m]));
+    return String(str).replace(/[&<>"']/g, function(m){
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m];
+    });
   }
   function escapeAttr(str) { return escapeHtml(str); }
 
-  searchInput.addEventListener("input", (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    if (!q) { render(allGroups); return; }
-    render(allGroups.filter(g =>
-      (g.name && g.name.toLowerCase().includes(q)) ||
-      (g.category && g.category.toLowerCase().includes(q)) ||
-      (g.description && g.description.toLowerCase().includes(q))
-    ));
-  });
+  function setTab(el, filter) {
+    var tabs = document.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+    el.classList.add("active");
+    currentTab = filter;
+    renderGrid();
+  }
 
-  loadGroups();
+  function applySearch() {
+    currentSearch = document.getElementById("searchInput").value.trim();
+    renderGrid();
+    document.getElementById("browse").scrollIntoView({behavior:"smooth"});
+  }
+
+  function quickSearch(term) {
+    document.getElementById("searchInput").value = term;
+    applySearch();
+  }
+
+  function selectType(el, type) {
+    var opts = document.querySelectorAll(".type-opt");
+    for (var i = 0; i < opts.length; i++) opts[i].classList.remove("selected");
+    el.classList.add("selected");
+    selectedType = type;
+  }
+
+  document.getElementById("registerBtn").addEventListener("click", async function () {
+    var msg = document.getElementById("formMsg");
+    msg.textContent = "";
+    msg.className = "form-msg";
+
+    var name = document.getElementById("gName").value.trim();
+    var description = document.getElementById("gDesc").value.trim();
+    var category = document.getElementById("gCategory").value;
+    var link = document.getElementById("gLink").value.trim();
+
+    if (!name || !category || !link) {
+      msg.textContent = "Please fill in all required fields.";
+      msg.classList.add("error");
+      return;
+    }
+    if (link.indexOf("https://chat.whatsapp.com/") !== 0) {
+      msg.textContent = "Please paste a valid WhatsApp invite link.";
+      msg.classList.add("error");
+      return;
+    }
+
+    var btn = document.getElementById("registerBtn");
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+
+    try {
+      var result = await supabaseClient.from(TABLE_NAME).insert([{
+        name: name,
+        description: description,
+        category: category,
+        whatsapp_link: link,
+        type: selectedType,
+        status: "pending"
+      }]);
+
+      btn.disabled = false;
+      btn.textContent = "Register Now";
+
+      if (result.error) {
+        msg.textContent = "Something went wrong: " + result.error.message;
+        msg.classList.add("error");
+        return;
+      }
+
+      msg.textContent = "Submitted! Your group will appear once approved.";
+      msg.classList.add("success");
+      document.getElementById("gName").value = "";
+      document.getElementById("gDesc").value = "";
+      document.getElementById("gCategory").value = "";
+      document.getElementById("gLink").value = "";
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = "Register Now";
+      msg.textContent = "Unexpected error: " + err.message;
+      msg.classList.add("error");
+    }
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="startApp()" onerror="cdnFailed()"></script>
+
 </body>
 </html>
